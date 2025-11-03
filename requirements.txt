@@ -1,0 +1,9 @@
+pandas
+numpy
+requests
+torch
+transformers
+yfinance
+scikit-learn
+matplotlib
+python-dotenv
