@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from dotenv import load_dotenv
 from typing import Tuple
 
-# Load environment variables from .env file
+# Loading environment variables from .env file
 load_dotenv()
 
 # --- 1. SETUP AND CONFIGURATION ---
@@ -32,7 +32,7 @@ except Exception as e:
     exit() # Stop the script if the model can't load
 
 
-# --- 2. CORE FUNCTIONS (Ported from your Cells) ---
+# --- 2. CORE FUNCTIONS ---
 
 def fetch_stock_data(ticker: str, start: str, end: str) -> pd.DataFrame:
     """Fetches historical stock data from yfinance."""
@@ -43,22 +43,19 @@ def fetch_stock_data(ticker: str, start: str, end: str) -> pd.DataFrame:
             print(f"⚠️ Warning: yfinance returned an empty table for {ticker}.")
             return pd.DataFrame() # Return the empty frame
         
-        # --- ⭐️ THIS IS THE FIX ⭐️ ---
-        # Check for MultiIndex (multi-level headers) and flatten it
+        # Checking for MultiIndex (multi-level headers) and flattening it
         if isinstance(stock_data.columns, pd.MultiIndex):
             print("Detected MultiIndex from yfinance. Flattening DataFrame...")
-            # Collapse the MultiIndex (e.g., ('Close', 'VBL.NS') -> 'Close')
-            # We only care about the first level (Open, High, etc.)
+            # Collapse the MultiIndex 
             stock_data.columns = stock_data.columns.get_level_values(0)
             
-            # Check for and remove duplicate columns (like 'Adj Close')
+            # Check for and remove duplicate columns
             if not stock_data.columns.is_unique:
                 stock_data = stock_data.loc[:, ~stock_data.columns.duplicated()]
-        # --- ⭐️ END OF FIX ⭐️ ---
 
         print("Calculating technical indicators...")
         
-        # This code will now *always* operate on a single-level index
+        # This code operates on a single-level index
         stock_data['SMA_5'] = stock_data['Close'].rolling(window=5).mean()
         stock_data['SMA_10'] = stock_data['Close'].rolling(window=10).mean()
         
@@ -151,7 +148,6 @@ def create_composite_signal(stock_df: pd.DataFrame, sentiment_df: pd.DataFrame) 
         else:
             daily_sentiment = pd.Series(index=stock_df.index, data=0, name='sentiment_numeric')
 
-        # This join will now work, as both stock_df and daily_sentiment are single-level
         combined_df = stock_df.join(daily_sentiment.rename('sentiment_score'), how='left').fillna(0)
 
         scaler = MinMaxScaler()
@@ -160,12 +156,12 @@ def create_composite_signal(stock_df: pd.DataFrame, sentiment_df: pd.DataFrame) 
         combined_df[features] = combined_df[features].fillna(0) 
         
         for col in features:
-            # Check for columns that are all the same value (no variance)
+            # Checking for columns that are all the same value (no variance)
             if (combined_df[col].max() - combined_df[col].min()) == 0:
                 print(f"Warning: Column '{col}' has no variance. Setting scaled to 0.")
                 combined_df[col] = 0.0
             else:
-                # Use .values.reshape(-1, 1) to avoid sklearn warning
+                # Using .values.reshape(-1, 1) to avoid sklearn warning
                 combined_df[col] = scaler.fit_transform(combined_df[col].values.reshape(-1, 1))
         
         weights = {'rsi_w': 0.5, 'sentiment_w': 0.5}
@@ -263,7 +259,6 @@ def main(ticker: str, query: str, start: str, end: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a multi-factor stock analysis and backtest.")
     
-    # --- YOUR ORIGINAL DEFAULTS (Cell 2 & 3) ---
     parser.add_argument('--ticker', type=str, default='VBL.NS', help='Stock ticker symbol')
     parser.add_argument('--query', type=str, default='Varun Beverages', help='News search query')
     parser.add_argument('--start', type=str, default='2025-10-05', help='Start date (YYYY-MM-DD)')
