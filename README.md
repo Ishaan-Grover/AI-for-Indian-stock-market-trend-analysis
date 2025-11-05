@@ -1,4 +1,5 @@
 # AI for Indian stock market trend analysis Tool
+### 📄 [View the Full Project Presentation (PDF)](Project_Presentation.pdf)
 
 This project analyzes a given stock by combining traditional technical indicators (like SMA and RSI) with modern AI-based sentiment analysis from news headlines. It backtests a trading strategy based on this composite signal.
 
@@ -38,4 +39,5 @@ This was a project for my Major in AI at IIT Ropar.
 5.  You can also analyze a different stock:
     ```
     python analyze.py --ticker "RELIANCE.NS" --query "Reliance Industries"
+
     ```
